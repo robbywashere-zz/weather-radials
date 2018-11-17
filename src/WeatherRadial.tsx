@@ -218,7 +218,7 @@ function CircleRender(city: string, data: WeatherData[]) {
         (originY + tempScale(d.tmin))
     )
     .attr("cx", barOriginX - barWidth / 2)
-    .attr("fill", "rgba(120, 150, 251, 0.35)")
+    .attr("fill", "rgba(120, 150, 251, 0.3)")
     .attr("r", d => rainScale(d.prcp))
     .attr('transform',(d,i)=>`rotate(${dayScale(i) + 180},${originX},${originY})`);
 
