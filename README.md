@@ -1,6 +1,10 @@
 # Weather Radials
 
-### Inspired by http://www.weather-radials.com/
+## ABOUT 
+
+2017 weather data taken from https://www.ncdc.noaa.gov
+
+Design by  http://www.weather-radials.com/
 
 ## DEMO
 
@@ -15,9 +19,5 @@ https://robbywashere.github.io/hb
 ## START
 
 `yarn start`
-
-## ABOUT 
-
-data was taken from https://www.ncdc.noaa.gov
 
 
