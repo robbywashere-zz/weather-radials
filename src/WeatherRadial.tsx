@@ -191,6 +191,21 @@ function CircleRender(city: string, data: WeatherData[]) {
     .range([0, 100])
     .domain([0, 100]);
 
+  const tempBar = svg
+    .selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("x", barOriginX - barWidth / 2)
+    .attr("width", barWidth)
+    .attr("data-temp", d => d.tmax)
+    .attr("data-date", d => d.date.toString())
+    .attr("height", d => tempScale(d.tmax) - tempScale(d.tmin))
+    .attr("fill", d => colors((d.tmax + d.tmin) / 2))
+    .attr("stroke", "none")
+    .attr("y", d => originY + tempScale(d.tmin))
+    .attr('transform',(d,i)=>`rotate(${dayScale(i) + 180},${originX},${originY})`);
+
   const rainDrops = svg
     .selectAll(".rain")
     .data(data)
@@ -203,35 +218,9 @@ function CircleRender(city: string, data: WeatherData[]) {
         (originY + tempScale(d.tmin))
     )
     .attr("cx", barOriginX - barWidth / 2)
-    .attr("fill", "rgba(120, 150, 251, 0.2)")
-    .attr("r", d => rainScale(d.prcp));
+    .attr("fill", "rgba(120, 150, 251, 0.35)")
+    .attr("r", d => rainScale(d.prcp))
+    .attr('transform',(d,i)=>`rotate(${dayScale(i) + 180},${originX},${originY})`);
 
-  const tempBar = svg
-    .selectAll(".bar")
-    .data(data)
-    .enter()
-    .append("rect")
-    .attr("x", barOriginX - barWidth / 2)
-    .attr("width", barWidth)
-    .attr("opacity", 1)
-    .attr("data-temp", d => d.tmax)
-    .attr("data-date", d => d.date.toString())
-    .attr("height", d => tempScale(d.tmax) - tempScale(d.tmin))
-    .attr("fill", d => colors((d.tmax + d.tmin) / 2))
-    .attr("stroke", "none")
-    .attr("y", d => originY + tempScale(d.tmin));
 
-  rotateTween(tempBar);
-  rotateTween(rainDrops);
-
-  function rotateTween(el: d3.Selection<any, any, any, any>) {
-    el.transition()
-      .duration(0)
-      .attrTween("transform", function tween(d, i, a) {
-        return d3.interpolateString(
-          `rotate(180,${originX},${originY})`,
-          `rotate(${dayScale(i) + 180},${originX},${originY})`
-        );
-      });
-  }
 }
