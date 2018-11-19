@@ -15,7 +15,7 @@ rows.each do |row|
   if CONVERT_TO_METRIC then
     %w(TMIN TMAX TAVG).each do |k|
       if not row[k].nil? and row[k].respond_to?(:to_f)
-        row[k] = '%.2f' % (Temperature.from_fahrenheit(row[k].to_f).celsius)
+        row[k] = '%.2f' % ((row[k].to_f * (9.0 / 5.0)) + 32)
       end
     end
     if not row["PRCP"].nil?
@@ -50,32 +50,4 @@ locale_store.select { |k,v| !v.empty? }.keys.each do |l|
       csv << d
     end
   end
-
 end
-
-class Temperature
-
-  class << self
-    def from_fahrenheit fahrenheit
-      Temperature.new(fahrenheit: fahrenheit)
-    end
-
-    def from_celsius celsius
-      Temperature.new(celsius: celsius)
-    end
-  end
-
-  def initialize(celsius: nil, fahrenheit: nil)
-    @fahrenheit = fahrenheit
-    @celsius = celsius
-  end
-
-  def fahrenheit
-    @fahrenheit ||= (@celsius * (9.0 / 5.0)) + 32
-  end
-
-  def celsius
-    @celsius ||= (@fahrenheit - 32) * 5.0 / 9.0
-  end
-end
-

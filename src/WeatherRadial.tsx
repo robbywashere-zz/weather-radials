@@ -1,72 +1,37 @@
-import React from "react";
 import * as d3 from "d3";
-import dayjs from "dayjs";
 
-type WeatherData = {
-  date: Date;
-  name: string;
-  prcp: number;
-  tavg: number;
-  tmax: number;
-  tmin: number;
-};
-
-const ETLWeatherData = (wd: any): WeatherData => ({
-  name: wd.NAME,
-  tavg: +wd.TAVG,
-  tmax: +wd.TMAX,
-  tmin: +wd.TMIN,
-  prcp: +wd.PRCP,
-  date: dayjs(wd.DATE).toDate()
-});
-
-export class Circle extends React.Component {
-  async componentDidMount() {
-    [
-      ["San Francisco", "sf_weather_2017.csv"],
-      ["Austin", "austin_2017.csv"],
-      ["Los Angeles", "los_angeles_2017.csv"],
-      ["Seattle", "seattle_2017.csv"],
-      ["New York City", "nyc_2017.csv"],
-      ["Cleveland", "cleveland_2017.csv"]
-    ].forEach(async ([label, csvFile]) =>
-      CircleRender(label, (await d3.csv(csvFile)).map(ETLWeatherData))
-    );
-  }
-  render() {
-    return <div id="weather-radials" />;
-  }
-}
-
-function CircleRender(city: string, data: WeatherData[]) {
-  let svg = d3.select("#weather-radials").append("svg");
-
+export function WeatherRadial(
+  element: d3.Selection<HTMLElement, {}, HTMLElement, any>,
+  city: string,
+  data: WeatherData[]
+) {
+  const svg = element.append("svg");
   svg
     .attr("viewBox", "0 0 1000 1000")
     .attr("width", 700)
     .attr("height", 700);
 
-  let originX = 500;
-  let originY = 500;
-  let outerCircleRadius = 400;
+  const originX = 500;
+  const originY = 500;
+  const outerCircleRadius = 400;
 
-  let barWidth = 3;
-  let barOriginX = originX + outerCircleRadius * Math.sin(0);
-  let barOriginY = originY - outerCircleRadius * Math.cos(0);
+  const barWidth = 3;
+  const barOriginX = originX + outerCircleRadius * Math.sin(0);
+  const barOriginY = originY - outerCircleRadius * Math.cos(0);
 
   const allTemps = data.reduce(
     (p, n) => [...p, n.tmin, n.tmax],
     [] as number[]
   );
 
-  let extent = d3.extent(allTemps) as [number, number];
+  const extent = d3.extent(allTemps) as [number, number];
 
-  let dayScale = d3
-    .scaleLinear()
-    .domain([0, 365])
+  const dayScale = d3
+    .scaleTime()
+    .domain([new Date("Jan 1, 2017"), new Date("Dec 31, 2017")])
     .range([0, 360]);
 
-  let tempScaleInvert = d3
+  const tempScaleInvert = d3
     .scaleLinear()
     .domain([-40, 40])
     .range([outerCircleRadius, 0]);
@@ -130,12 +95,12 @@ function CircleRender(city: string, data: WeatherData[]) {
       return d.toUpperCase();
     });
 
-  let tempScale = d3
+  const tempScale = d3
     .scaleLinear()
     .domain([-40, 40])
     .range([0, outerCircleRadius]);
 
-  let circles = svg
+  const circles = svg
     .selectAll(".circle-ticks")
     .data(tempScale.ticks(7))
     .enter()
@@ -153,8 +118,8 @@ function CircleRender(city: string, data: WeatherData[]) {
 
   svg.selectAll(".circle-ticks:nth-of-type(2)").remove();
 
-  let formatNumber = d3.format("-");
-  let xAxis = d3
+  const formatNumber = d3.format("-");
+  const xAxis = d3
     .axisLeft(tempScaleInvert)
     .ticks(5)
     .tickFormat(d => formatNumber(d) + " °C");
@@ -183,8 +148,7 @@ function CircleRender(city: string, data: WeatherData[]) {
 
   svg.selectAll(".tick:first-of-type").remove();
 
-  //const invertExtent = extent.reverse();
-  const colors = d3.scaleSequential(d3.interpolateSpectral).domain([35, 5]);
+  const colors = d3.scaleSequential(d3.interpolateSpectral).domain([35, 0]);
 
   const rainScale = d3
     .scaleLinear()
@@ -204,7 +168,10 @@ function CircleRender(city: string, data: WeatherData[]) {
     .attr("fill", d => colors((d.tmax + d.tmin) / 2))
     .attr("stroke", "none")
     .attr("y", d => originY + tempScale(d.tmin))
-    .attr('transform',(d,i)=>`rotate(${dayScale(i) + 180},${originX},${originY})`);
+    .attr(
+      "transform",
+      d => `rotate(${dayScale(d.date) + 180},${originX},${originY})`
+    );
 
   const rainDrops = svg
     .selectAll(".rain")
@@ -218,9 +185,29 @@ function CircleRender(city: string, data: WeatherData[]) {
         (originY + tempScale(d.tmin))
     )
     .attr("cx", barOriginX - barWidth / 2)
-    .attr("fill", "rgba(120, 150, 251, 0.35)")
+    .attr("fill", "rgba(120, 150, 251, 0.275)")
     .attr("r", d => rainScale(d.prcp))
-    .attr('transform',(d,i)=>`rotate(${dayScale(i) + 180},${originX},${originY})`);
-
-
+    .attr(
+      "transform",
+      d => `rotate(${dayScale(d.date) + 180},${originX},${originY})`
+    );
 }
+
+export type WeatherData = {
+  date: Date;
+  name: string;
+  prcp: number;
+  tavg: number;
+  tmax: number;
+  tmin: number;
+};
+
+const timeParse = d3.timeParse("%Y-%m-%d");
+export const ETLWeatherData = (wd: any): WeatherData => ({
+  name: wd.NAME,
+  tavg: +wd.TAVG,
+  tmax: +wd.TMAX,
+  tmin: +wd.TMIN,
+  prcp: +wd.PRCP,
+  date: timeParse(wd.DATE) as Date
+});
