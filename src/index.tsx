@@ -16,3 +16,7 @@ import * as d3 from "d3";
     (await d3.csv(csvFile)).map(ETLWeatherData)
   )
 );
+
+d3.select("body")
+  .append("h1")
+  .text("Weather Radials / 2017 ");
