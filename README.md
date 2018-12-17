@@ -10,7 +10,7 @@ Design by  http://www.weather-radials.com/
 
 https://weather-radials.netlify.com
 
-https://robbywashere.github.io/hb
+https://robbywashere.github.io/weather-radials
 
 ## INSTALL
 
